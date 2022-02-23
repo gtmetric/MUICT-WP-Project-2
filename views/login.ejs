@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <Title>Movie Search System</Title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <%- include('./partials/style'); %>
+        
+        <%- include('./partials/script'); %>
+
+         <!-- Internal CSS -->
+         <style>
+            input[type=text], input[type=password], select {
+                width: 50%;
+                padding: 5px 10px;
+                margin: 8px 0;
+                display: inline-block;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+            }
+            
+            input[type=button] {
+                background-color: #B4789D;
+                color: white;
+                padding: 5px;
+                /* margin: 8px; */
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                letter-spacing: 3px;
+            }
+            
+            input[type=button]:hover {
+                background-color: #C6A89C;
+            }
+                
+            label {
+                letter-spacing: 2px;
+                font-size: 18px;
+            }
+        </style>
+
+        <script type="application/javascript">
+            $(document).ready(function() {
+                var auth_pass = false;
+
+                /* Log in as User */
+                $("#user_login").click(async function() {
+                    let username = $("#username").val();
+                    let password = $("#password").val();
+
+                    // Get the recent date
+                    let date = new Date(Date.now());
+                    let date_str = date.getFullYear() + "-" + (parseInt(date.getMonth())+1) + "-" + date.getDate();
+
+                    // Prepare the request for log in
+                    let data = {
+                        login_info: {
+                            username: username,
+                            password: password,
+                            last_login: date_str
+                        },
+                        login_type: "user"
+                    }
+
+                    // For debug
+                    // console.log(JSON.stringify(data));
+
+                    // Request to Log in as User
+                    let response = await fetch("http://localhost:8080/user/", {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    // Convert the response to JSON
+                    let resJSON = await response.json();
+
+                    // Get the authorization pass from the response
+                    let auth_pass = resJSON.data.auth_pass;
+
+                    // For debug
+                    // console.log(auth_pass);
+
+                    // Print some messages to tell the user if the login was successful or not
+                    if(auth_pass) {
+                        $("#message").html("<br><b><label>You are logged in.<label></b><br>" + 
+                            "<a href=\"http://localhost:8080/user/\"><input type=\"button\" value=\"Go to your page\"></a>");
+                    }
+                    else {
+                        $("#message").html("Invalid username or password");
+                    }
+
+                });
+
+                /* Log in as Admin */
+                $("#admin_login").click(async function() {
+                    let username = $("#username").val();
+                    let password = $("#password").val();
+
+                    // Get the recent date
+                    let date = new Date(Date.now());
+                    let date_str = date.getFullYear() + "-" + (parseInt(date.getMonth())+1) + "-" + date.getDate();
+
+                    // Prepare the request for log in
+                    let data = {
+                        login_info: {
+                            username: username,
+                            password: password,
+                            last_login: date_str
+                        },
+                        login_type: "admin"
+                    }
+
+                    // For debug
+                    // console.log(JSON.stringify(data));
+
+                    // Request to Log in as Admin
+                    let response = await fetch("http://localhost:8080/admin/", {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                     // Convert the response to JSON
+                    let resJSON = await response.json();
+
+                    // Get the authorization pass from the response
+                    let auth_pass = resJSON.data.auth_pass
+
+                    // For debug
+                    // console.log(auth_pass);
+
+                    // Print some messages to tell the user if the login was successful or not
+                    if(auth_pass) {
+                        $("#message").html("<br><b><label>You are logged in.</label></b><br>" + 
+                            "<a href=\"http://localhost:8080/admin/\"><input type=\"button\" value=\"Go to your page\"></a>");
+                    }
+                    else {
+                        $("#message").html("Invalid username or password");
+                    }
+                });
+
+            });
+        </script>
+    </head>
+
+    <body>
+        
+        <!-- Header -->
+        <%- include('./partials/header'); %>
+
+        <!-- Navigation bar -->
+        <nav>
+            <div class="container">
+                <!-- Login -->
+                   <center><h1 style="color: white; letter-spacing: 10px; padding: 2% 0;">Log in</h1></center> 
+        </div>
+        </nav>
+
+        <section style="background-color: #F7F7F7;">
+            <center><div>
+                
+                <form action="#">
+
+                  <!--username-->
+                  <b><label for="Username">Username</label></b>
+                  <br><input type="text" name="Username" placeholder="Username" id="username">
+
+                  <!--password-->
+                  <b><br><label for="Password">Password</label></b>
+                  <br><input type="password" name="Password" placeholder="*******" id="password">
+
+                  <!--Button-->
+                  <br><br><input type="button" value="Log in as User" id="user_login">
+                  <input type="button" value="Log in as Admin" id="admin_login">
+
+                </form>
+                <div id="message"><br><br></div>
+
+              </div></center>
+        </section>
+
+        <!--Footer-->
+        <%- include('./partials/footer'); %>
+
+    </body>
+    </body>
+</html>

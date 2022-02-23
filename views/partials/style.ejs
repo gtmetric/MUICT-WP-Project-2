@@ -1,0 +1,90 @@
+<!-- Bootstrap -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+<!-- Your CSS goes here -->
+<style>
+
+    * {
+        font-family: "Times New Roman", Georgia, Serif;
+    }
+
+    /* Header */
+    header {
+        background-color: white;
+        font-size: 50px;
+        text-align: center;
+        padding: 80px;
+    }
+    header a {
+        color: black;
+        text-decoration: none;
+        transition: 0.25s;
+        letter-spacing: 10px;
+    }
+    header a:hover {
+        color: white;
+        text-decoration: none;
+        background-color: black;
+        padding: 5% 20%;
+        border-radius: 20px;
+    }
+
+    /* Navigation bar */
+    nav {
+        background-color: black;
+        font-size: 25px;
+        position: relative;
+    }
+
+    /* Body */
+    section {
+        display: block;
+        padding: 2%;
+        line-height: 2;
+    }
+    body {
+        font-size: 5px;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        letter-spacing: 5px;
+    }
+
+    /* Footer */
+    footer {
+        background-color: black;
+        color: white;
+        text-align: center;
+        font-size: 25px;
+        padding: 20px;
+        letter-spacing: 5px;
+    }
+
+    /* For smaller screen */
+    /* @media screen and (max-width: 950px) {
+        header a, nav, footer, #aboutme h3, .carousel-item h3 {
+            font-size: 30px;
+        }
+    } */
+
+    @media screen and (max-width: 1400px){
+        header a, nav h1, footer {
+            font-size: 40px;
+        }
+        header a:hover {
+            border-radius: 15px;
+            padding: 5%;
+        }
+    }
+
+    @media screen and (max-width: 950px) {
+        header a, nav h1, footer {
+            font-size: 20px;
+        }
+        header a:hover {
+            border-radius: 10px;
+            padding: 5%;
+        }
+    }
+
+</style>

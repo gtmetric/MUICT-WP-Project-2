@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Movie Search System</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <%- include('./partials/style'); %>
+        
+        <%- include('./partials/script'); %>
+
+        <!-- Internal CSS -->
+        <style>
+            input[type=text], input[type=date], select {
+                width: 50%;
+                padding: 5px 10px;
+                margin: 8px 0;
+                display: inline-block;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+            }
+            
+            input[type=submit] {
+                /* width: 10%; */
+                background-color: #B4789D;
+                color: white;
+                padding: 10px 35px;
+                margin: 8px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                letter-spacing: 3px;
+            }
+            
+            input[type=submit]:hover {
+                background-color: #C6A89C;
+            }
+
+            input[type=submit]:focus {
+                outline:0;
+            }
+                
+            label {
+                letter-spacing: 2px;
+                font-size: 18px;
+            }
+        </style>
+
+        <!-- JavaScript and JQuery -->
+        <script type="application/javascript">
+        
+            var month = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            $(document).ready(function() {
+
+                /* Clear all inputs */
+                function clearInput() {
+                    $("#id").val("");
+                    $("#fname").val("");
+                    $("#lname").val("");
+                    $("#bd").val("");
+                    $("#email").val("");
+                    $("#username").val("");
+                    $("#password").val("");
+                }
+
+                /* List all users */
+                $("#listall").click(async function () {
+
+                    // Request for a list of all users
+                    let response = await fetch("http://localhost:8080/admin/listall", { method: "GET" });
+
+                    // Convert the response to JSON
+                    let results = await response.json();
+
+                    // For debug
+                    // console.log(results.data);
+                
+                    // Prepare the list of all users in HTML
+                    let output;
+                    output = "<br><h1 style='text-align: center;background-color: black;color: white;padding: 1%;'>User List</h1>"
+                    output += "<table class='table'>";
+                    output += "<thead>";
+                    output += "<tr>";
+                    output +=
+                        "<th scope='col'>#</th><th scope='col'>First name</th><th scope='col'>Last name</th><th scope='col'>DOB</th><th scope='col'>Email</th><th scope='col'>Username</th>";
+                    output += "</tr>";
+                    output += "</thead>";
+                    output += "<tbody>";
+                    results.data.forEach(element => {
+                        var dob = new Date(Date.parse(element.bd));
+                        output += "<tr>";
+                        output += "<td>" + element.id + "</td>";
+                        output += "<td>" + element.fname + "</td>";
+                        output += "<td>" + element.lname + "</td>";
+                        output += "<td>" + dob.getDate() + " " + month[dob.getMonth()] + " " + dob.getFullYear() + "</td>";
+                        output += "<td>" + element.email + "</td>";
+                        output += "<td>" + element.username + "</td>";
+                        output += "</tr>";
+                    });
+                    output += "</tbody>";
+                    output += "</table>";
+                    
+                    // Send the output and clear all inputs
+                    $("#message").html(output);
+                    clearInput();
+
+                });
+
+                /* Search for users */
+                $("#search").click(async function () {
+                    let id = $("#id").val();
+                    let fname = $("#fname").val();
+                    let lname = $("#lname").val();
+                    let email = $("#email").val();
+
+                    // Prepare the request for searching
+                    let user_info = {
+                        id: id,
+                        fname: fname,
+                        lname: lname,
+                        email: email
+                    }
+
+                    // Request for searching users
+                    let response = await fetch("http://localhost:8080/admin/search", {
+                        method: "POST",
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(user_info)
+                    });
+
+                    // Convert the response to JSON
+                    let results = await response.json();
+
+                    // For debug
+                    // console.log(results.data);
+                
+                    // Prepare the list of users from the search in HTML
+                    let output;
+                    output = "<br><h1 style='text-align: center;background-color: black;color: white;padding: 1%;'>User List</h1>"
+                    output += "<table class='table'>";
+                    output += "<thead>";
+                    output += "<tr>";
+                    output +=
+                        "<th scope='col'>#</th><th scope='col'>First name</th><th scope='col'>Last name</th><th scope='col'>DOB</th><th scope='col'>Email</th><th scope='col'>Username</th>";
+                    output += "</tr>";
+                    output += "</thead>";
+                    output += "<tbody>";
+                    results.data.forEach(element => {
+                        var dob = new Date(Date.parse(element.bd));
+                        output += "<tr>";
+                        output += "<td>" + element.id + "</td>";
+                        output += "<td>" + element.fname + "</td>";
+                        output += "<td>" + element.lname + "</td>";
+                        output += "<td>" + dob.getDate() + " " + month[dob.getMonth()] + " " + dob.getFullYear() + "</td>";
+                        output += "<td>" + element.email + "</td>";
+                        output += "<td>" + element.username + "</td>";
+                        output += "</tr>";
+                    });
+                    output += "</tbody>";
+                    output += "</table>";
+                    
+                    // Send the output and clear all inputs
+                    $("#message").html(output);
+                    clearInput();
+
+                });
+
+                /* Delete a user */
+                $("#delete").click(async function() {
+                    let username = $("#username").val();
+
+                    // Prepare the request for deleting
+                    let data = {
+                        username: username
+                    };
+
+                    // Request for deleting a user
+                    let response = await fetch("http://localhost:8080/admin/delete", {
+                        method: "DELETE",
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    // Convert the response to JSON
+                    let results = await response.json();
+
+                    // Print some messages to tell the user if the delete was successful or not
+                    if(!results.error) {
+                        console.log("Deleted successfully");
+                    }
+                    else {
+                        console.log("Failed to delete");
+                    }
+
+                    // Clear all inputs
+                    clearInput();
+
+                });
+
+                /* Update info of a user */
+                $("#update").click(async function() {
+                    let id = $("#id").val();
+                    let fname = $("#fname").val();
+                    let lname = $("#lname").val();
+                    let bd = $("#bd").val();
+                    let email = $("#email").val();
+                    
+                    // Format the DOB
+                    let dob = new Date(Date.parse(bd));
+                    let date =  dob.getFullYear() + "-" + (parseInt(dob.getMonth())+1) + "-" + dob.getDate();
+
+                    // Prepare the request for updating
+                    let user_info = {
+                        id: id,
+                        fname: fname,
+                        lname: lname,
+                        bd: date,
+                        email: email
+                    };
+
+                    // For debug
+                    // console.log(user_info);
+
+                    // Request for updating info of a user
+                    let response = await fetch("http://localhost:8080/admin/update", {
+                        method: "PUT",
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(user_info)
+                    });
+
+                    // Convert the response to JSON
+                    let results = await response.json();
+
+                    // Print some messages to tell the user if the update was successful or not
+                    if(!results.error) {
+                        console.log("Updated successfully");
+                    }
+                    else {
+                        console.log("Failed to update");
+                    }
+
+                    // Clear all inputs
+                    clearInput();
+
+                });
+
+                /* Add a new user */
+                $("#add").click(async function() {
+                    let id = $("#id").val();
+                    let fname = $("#fname").val();
+                    let lname = $("#lname").val();
+                    let bd = $("#bd").val();
+                    let email = $("#email").val();
+                    let username = $("#username").val();
+                    let password = $("#password").val();
+
+                    // Format the DOB
+                    let dob = new Date(Date.parse(bd));
+                    let date =  dob.getFullYear() + "-" + (parseInt(dob.getMonth())+1) + "-" + dob.getDate();
+
+                    // Get the recent date
+                    let now = new Date(Date.now());
+                    let now_str = now.getFullYear() + "-" + (parseInt(now.getMonth())+1) + "-" + now.getDate();
+
+                    // Prepare the request for adding
+                    let info = {
+                        user_info: {
+                            id: id,
+                            fname: fname,
+                            lname: lname,
+                            bd: date,
+                            email: email
+                        },
+                        login_info: {
+                            username: username,
+                            password: password,
+                            last_login: now_str,
+                            user_id: id
+                        }
+                    };
+
+                    // For debug
+                    // console.log(info);
+
+                    // Request for adding a new user
+                    let response = await fetch("http://localhost:8080/admin/add", {
+                        method: "POST",
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(info)
+                    });
+
+                    // Convert the response to JSON
+                    let results = await response.json();
+
+                    // Print some messages to tell the user if the adding the new user was successful or not
+                    if(!results.error) {
+                        console.log("Added successfully");
+                    }
+                    else {
+                        console.log("Failed to add");
+                    }
+
+                    // Clear all inputs
+                    clearInput();
+
+                });
+
+            });
+        </script>
+    </head>
+
+    <body>
+        
+        <!-- Header -->
+        <%- include('./partials/header'); %>
+
+        <!-- Navigation bar -->
+        <nav>
+            <div class="container">
+                    <!-- Login -->
+                       <center><h1 style="color: white; letter-spacing: 10px; padding: 2% 0;">Admin</h1></center> 
+            </div>
+        </nav>
+
+        <section style="background-color: #F7F7F7;">
+            <center><div>
+                
+                <form action="/">
+                    <!--ID-->
+                    <b><label for="id">ID</label></b>
+                    <br><input type="text" name="id" placeholder="Eg. 123456 " id="id">
+
+                    <!--Firstname-->
+                    <br><b><label for="firstname">Firstname</label></b>
+                    <br><input type="text" name="firstname" placeholder="Eg. Bobby" id="fname">
+
+                    <!--Lastname-->
+                    <b><br><label for="lastname">Lastname</label></b>
+                    <br><input type="text" name="lastname" placeholder="Eg. Brown" id="lname">
+
+                    <!--Birthdate-->
+                    <b><br><label for="birthdate">Birthdate</label></b>
+                    <br><input type="date" name="birthdate" placeholder="Eg. 30/01/1999" id="bd">
+
+                    <!--Email-->
+                    <br><b><label for="email">Email</label></b>
+                    <br><input type="text" name="email" placeholder="Eg. Bobby.b@hotmail.com " id="email">
+
+                    <!--Username-->
+                    <b><br><label for="username">Username</label></b>
+                    <br><input type="text" name="username" placeholder="Eg. Bobby.b" id="username">
+
+                    <!--Password-->
+                    <br><b><label for="password">Password</label></b>
+                    <br><input type="text" name="password" placeholder="Eg. xxxxx" id="password">
+                </form>
+
+                <!--Button-->
+                <div>
+                    
+                    <br><input type="submit" value="Add" id="add">
+                    <input type="submit" value="Update" id="update">
+                    <input type="submit" value="Delete" id="delete">
+                    <input type="submit" value="Search" id="search">
+                    <input type="submit" value="List all" id="listall">
+                </div>
+                
+              </div></center>
+
+              <div id="message"></div>
+
+        </section>
+
+        <!--Footer-->
+        <%- include('./partials/footer'); %>
+
+    </body>
+</html>

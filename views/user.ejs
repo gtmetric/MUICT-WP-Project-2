@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Movie Search System</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <%- include('./partials/style'); %>
+
+        <%- include('./partials/script'); %>
+
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+        <style>
+            .search {
+                margin: auto;
+                
+            }
+
+            input[type=text], select {
+                width: 50%;
+                padding: 5px 10px;
+                margin: 8px 0;
+                display: inline-block;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+            }
+
+            input[type=button] {
+                width: 10%;
+                background-color: #B4789D;
+                color: white;
+                padding: 5px 5px;
+                margin: 8px 0;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                letter-spacing: 3px;
+            }
+      
+            input[type=button]:hover {
+                background-color: #C6A89C;
+            }
+
+            .info {
+                background-color: antiquewhite;
+                padding: 3% 20%;
+                /* letter-spacing: 0; */
+                line-height: 1;
+            }
+
+            .info h5 {
+                line-height: 1.5;
+                letter-spacing: 2px;
+            }
+
+            .info a {
+                letter-spacing: 0;
+            }
+
+            audio:focus {
+                outline:0;
+            }
+
+        </style>
+
+        <!-- JavaScript and JQuery -->
+        <script type="application/javascript">
+
+            var month = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            // Start JQuery
+            $("document").ready(function() {
+
+                $("#search").click(async function() {
+                    let query = $("#query").val();
+
+                    // For debug
+                    // console.log(query);
+
+                    // Prepare the query (search word)
+                    let data = { query: query };
+
+
+                    /* ---------- The Movie Database API ---------- */ 
+                    
+                    // API Key for The Movie Database API
+                    let API_key = "6d26f32fd3af8bc79d3c2f4e135437a2";
+
+                    let params = {
+                        api_key: API_key,
+                        query: query,
+                        page: 1
+                    };
+
+                    let searchURL = "https://api.themoviedb.org/3/search/movie?";
+                    let res = await axios.get(searchURL, {params, responseType: 'json'}).catch((error) => {
+                        console.error(error.response.data);
+                    });
+
+                    // For debug
+                    // console.log(res.data);
+
+                    // Catch the results from the response
+                    let results = res.data.results;
+
+                    // Clear the recent result
+                    $("#info").html("");
+
+                    // For debug
+                    // console.log(results);
+
+                    // Prepare the output in HTML
+                    let output1 = "<br><br><h1>Movie Information</h1><br><br><div class=\"card\" style=\"background-color: antiquewhite;\">";
+
+                    // Run a loop on the results
+                    $.each(results, function (index, item) {
+
+                        let date = new Date(Date.parse(item.release_date));
+                        let release_date = date.getDate() + " " + month[parseInt(date.getMonth())] + " " + date.getFullYear();
+
+                        // Store the output in a string
+                        output1 += "<div class=\"card-header\"><h4><br><b>Movie Title: \"" + item.title +
+                                "\"</b></h4><div class=\"card-body\" style=\"text-align: left;\"><blockquote class=\"blockquote mb-0\"><b>Original Title:</b> " + item.original_title + 
+                                    "<br><b>Original Language:</b> " + item.original_language + "<br><b>Rate:</b> " + 
+                                    item.vote_average + "<br><b>Released Date</b>: " + release_date + "<br><b>Storyline:</b><br>&nbsp;&nbsp;&nbsp;&nbsp;" + 
+                                    item.overview + "</blockquote></div></div>";
+
+                        // Send the output after each round is finished
+                        $("#info").html(output1);
+
+                    });
+
+                    /* ------- End of The Movie Database API ------ */ 
+
+
+                    /* --------------- YouTube API ---------------- */
+
+                    // API Key for YouTube API
+                    API_key = "AIzaSyD0fvvcb-bzaFyidGzO71SX9yp4XXOo-6o";
+
+                    // Prepare the parameters for the request
+                    params = {
+                        part: 'snippet',
+                        maxResults: 3,
+                        q: query + " trailer",
+                        type: "video",
+                        key: API_key
+                    };
+
+                    // Request for Movie Title, Thumbnail (image), and URL (link)
+                    searchURL = "https://www.googleapis.com/youtube/v3/search?";
+                    res = await axios.get(searchURL, {params, responseType: 'json'}).catch((error) => {
+                        console.error(error.response.data);
+                    });
+                    
+                    // Catch the results from the response
+                    results = res.data.items;
+
+                    // Clear the recent result
+                    $("#trailer").html("");
+
+                    // For debug
+                    // console.log(res);
+
+                    // Prepare the output in HTML
+                    let output2 = "<br><br><h1>Movie Trailer</h1><br><br>";
+
+                    // Run a loop on the results
+                    $.each(results, function (index, item) {
+
+                        // Store the output in a string
+                        output2 += "<div class=\"info\"><h4><b>" + item.snippet.title +
+                                "</b></h4><img src=\"" + item.snippet.thumbnails.high.url +
+                                "\"><br><h5 style=\"padding-top: 1%;\"><a href=\"https://www.youtube.com/embed/" +
+                                item.id.videoId + "\" >https://www.youtube.com/embed/" +
+                                item.id.videoId + "</a></h5></div><br>";
+
+                        // Send the output after each round is finished
+                        $("#trailer").html(output2);
+
+                    });
+
+                    /* ------------ End of YouTube API ------------ */
+
+                    
+                    /* -------------- Spotify Web API ------------- */
+                    
+                    // Request for searching albums
+                    response = await fetch("http://localhost:8080/user/spotify/album", {
+                        method: "POST",
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    // Convert the response to JSON
+                    let albums = await response.json();
+
+                    // Clear the recent result
+                    $("#sound").html("");
+
+                    // Prepare the output in HTML
+                    let output3 = "<br><h1>Soundtrack</h1><br><br>";
+
+                    // Run a loop on the results
+                    $.each(albums.data, async function (index, item) {
+
+                        // Prepare the album ID for searching the first track in the album
+                        data = { id: item.id };
+
+                        // Request for the first track in the album
+                        response = await fetch("http://localhost:8080/user/spotify/track", {
+                            method: "POST",
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        });
+
+                        // Convert the response to JSON
+                        let track = await response.json();
+
+                        // Store the output in a string
+                        output3 += "<div class=\"info\"><h4><b>" + item.name + "</b></h4><img src=\"" + item.images[1].url +"\"><br>";
+
+                        // If the audio is not available, put a link to Spotify page
+                        if(track.data.audio==null) {
+                            output3 += "<h5 style=\"padding-top: 1%;\"><a href=\"" + track.data.link + "\"> " + track.data.link + " </a></h5></div><br>";
+                        }
+                        else {
+                            output3 += "<audio controls style=\"padding-top: 2%;\"><source src=\"" + track.data.audio + "\"type=\"audio/mpeg\"></audio></div><br>";;
+                        }
+                        
+                        // Send the output after each round is finished
+                        $("#sound").html(output3);
+
+                    });
+
+                    /* ---------- End of Spotify Web API ---------- */
+
+
+                    /* --------------- Twitter API ---------------- */
+
+                    // Prepare the query (search word)
+                    data = { query: query };
+
+                    // Request for searching comments
+                    response = await fetch("http://localhost:8080/user/twitter", {
+                        method: "POST",
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    // Convert the response to JSON
+                    let comments = await response.json();
+
+                    // Clear the recent result
+                    $("#comment").html("");
+
+                    // Prepare the output in HTML
+                    let output4 = "<br><h1>Comments on Twitter</h1><br><br><div class=\"card\" style=\"background-color: antiquewhite;\">";
+
+                    // Run a loop on the results
+                    $.each(comments.data, async function (index, item) {
+
+                        date = new Date(Date.parse(item.created_at));
+                        posted_date = date.getDate() + " " + month[parseInt(date.getMonth())] + " " + date.getFullYear();
+
+                        output4 += "<div class=\"card-header\"><h4><br><b>" + item.user.screen_name +
+                                "</b></h4><div class=\"card-body\" style=\"text-align: left;\"><blockquote class=\"blockquote mb-0\"><b>Comment:<br></b>&nbsp;&nbsp;&nbsp;&nbsp;" + item.text + 
+                                "<footer class=\"blockquote-footer\" style=\"background-color: #F7F7F7;\"><b>On " + posted_date + "</b></footer></blockquote></div></div>";
+
+                        // Send the output after each round is finished
+                        $("#comment").html(output4);
+
+                    });
+
+                    /* ----------- End of Twitter API ------------- */
+
+                });
+
+            });
+
+        </script>
+
+    </head>
+
+    <body>
+        
+        <!-- Header -->
+        <%- include('./partials/header'); %>
+
+        <!-- Navigation bar -->
+        <nav>
+            <div class="container">
+                    <!-- Login -->
+                       <center><h1 style="color: white; letter-spacing: 10px; padding: 2% 0;">User</h1></center> 
+            </div>
+        </nav>
+
+        <section style="background-color: #F7F7F7;">
+            <center><div>
+                <div class="container">
+
+                    <div class = "search">
+                        <form action="#"></form>
+                            <input type="text" id="query">&nbsp;&nbsp;
+                            <!-- <button id="button-search">Search</button> -->
+                            <input type="button" value="Search" id="search">
+                        </form>
+                    </div>
+                
+                    <!-- Movie Info -->
+                    <div id="info"></div>
+                    
+                    <!-- Movie Trailer -->
+                    <div id="trailer"></div>
+
+                    <!-- Soundtrack -->
+                    <div id="sound"></div>
+                    
+                    <!-- Movie Comments -->
+                    <div id="comment"></div>
+
+                </div>
+              </div></center>
+        </section>
+
+        <!--Footer-->
+        <%- include('./partials/footer'); %>
+
+    </body>
+</html>
